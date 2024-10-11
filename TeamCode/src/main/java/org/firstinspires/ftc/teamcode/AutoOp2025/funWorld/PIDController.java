@@ -20,6 +20,8 @@ public class PIDController {
     }
 
     // Body of the PID controller
+    // Spits out a value based on the proportional, integral, and derivative constants with respect to error
+    // If future me is confused, go watch a youtube video
     public double PIDControl(double target, double currentPosition) {
         double error = target - currentPosition;
         integralSum += error * timer.seconds();

@@ -26,7 +26,7 @@ public class Autonomous2025 extends LinearOpMode {
     static final double     WHEEL_DIAMETER_INCHES   = 4.0 ;     // For figuring circumference
     static final double     COUNTS_PER_INCH         = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) /
             (WHEEL_DIAMETER_INCHES * 3.1415); // Translation of Motor Ticks Into Real Inches
-    static final double MAX_WHEEL_POWER = 1;
+    static final double MAX_WHEEL_POWER = 1;  // Will not allow motor power to go above this value
 
     PIDController drive = new PIDController(.05 , 0, 0);
 

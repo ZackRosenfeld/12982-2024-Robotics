@@ -1,12 +1,13 @@
-package org.firstinspires.ftc.teamcode.AutoOp2025;
+package org.firstinspires.ftc.teamcode.Autonomous;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
-import com.sun.tools.javac.tree.DCTree;
 
-import org.firstinspires.ftc.teamcode.AutoOp2025.funWorld.PIDController;
+//import com.sun.tools.javac.tree.DCTree;
+
+import org.firstinspires.ftc.teamcode.Autonomous.funWorld.PIDController;
 
 @Autonomous(name="Autonomous2025")
 public class Autonomous2025 extends LinearOpMode {
@@ -52,6 +53,11 @@ public class Autonomous2025 extends LinearOpMode {
         //lin2.setDirection(DcMotor.Direction.REVERSE);
         //clawMotor.setDirection(DcMotor.Direction.FORWARD);
 
+        frontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        backLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        frontRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        backRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
         // changing motor settings
         frontLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         backLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -65,17 +71,21 @@ public class Autonomous2025 extends LinearOpMode {
 
         waitForStart();
 
-        DriveToPositionByPID(12, drive);
+        DriveToPositionByPID(36, drive);
 
     }
 
     public void DriveToPositionByPID(double inches, PIDController driver) {
-        while (Math.abs(inches - frontLeft.getCurrentPosition() / COUNTS_PER_INCH) > .1) {
-            double power = driver.PIDControl(inches * COUNTS_PER_INCH, frontLeft.getCurrentPosition());
+        while (Math.abs(inches - frontLeft.getCurrentPosition() / COUNTS_PER_INCH) != 0) {
+            double power = driver.PIDControl(inches, frontLeft.getCurrentPosition() / COUNTS_PER_INCH);
 
             if (power > MAX_WHEEL_POWER) {
                 power = MAX_WHEEL_POWER;
             }
+
+            telemetry.addData("Wheel Power: ", power);
+            telemetry.addData("Wheel Position: ", frontLeft.getCurrentPosition());
+            telemetry.update();
 
             frontLeft.setPower(power);
             backLeft.setPower(power);

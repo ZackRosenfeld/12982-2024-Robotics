@@ -4,7 +4,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
-import com.sun.tools.javac.tree.DCTree;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.AutoOp2025.funWorld.PIDController;
 
@@ -58,31 +58,74 @@ public class Autonomous2025 extends LinearOpMode {
         frontRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         backRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
+        // Im not sure which zero power behavior I will want so I will leave both for easy testing
+        /*
         frontLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         backLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         frontRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         backRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        */
+
+        frontLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        backLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        frontRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        backRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
 
         waitForStart();
-
-        DriveToPositionByPID(12, drive);
+        DriveToPositionByPID(36, drive);
 
     }
 
     public void DriveToPositionByPID(double inches, PIDController driver) {
-        while (Math.abs(inches - frontLeft.getCurrentPosition() / COUNTS_PER_INCH) > .1) {
-            double power = driver.PIDControl(inches * COUNTS_PER_INCH, frontLeft.getCurrentPosition());
+        // Add a timer to track how long the error has stayed within the threshold
+        ElapsedTime stabilityTimer = new ElapsedTime();
+        double stabilityThreshold = 0.1; // The acceptable range of error (inches)
+        double stabilityTime = 0.5; // Time (in seconds) the error must remain within threshold to be considered stable
 
+        while (opModeIsActive()) {
+            double currentPosition = frontLeft.getCurrentPosition() / COUNTS_PER_INCH;
+            double error = Math.abs(inches - currentPosition);
+
+            // PID control output
+            double power = driver.PIDControl(inches, currentPosition);
+
+            // Limit max power
             if (power > MAX_WHEEL_POWER) {
                 power = MAX_WHEEL_POWER;
             }
 
+            // Set motor power
             frontLeft.setPower(power);
             backLeft.setPower(power);
             frontRight.setPower(power);
             backRight.setPower(power);
+
+            // Optional for testing and diagnosing issues
+            telemetry.addData("Wheel Power: ", power);
+            telemetry.addData("Front Left Position: ", frontLeft.getCurrentPosition());
+            telemetry.addData("Front Right Position: ", frontRight.getCurrentPosition());
+            telemetry.addData("Back Left Position: ", backLeft.getCurrentPosition());
+            telemetry.addData("Back Right Position: ", backRight.getCurrentPosition());
+            telemetry.update();
+
+            // Check if the error is within the threshold
+            if (error < stabilityThreshold) {
+                if (stabilityTimer.seconds() >= stabilityTime) {
+                    // If error has been stable for enough time, exit the loop
+                    break;
+                }
+            } else {
+                // Reset the timer if the error goes above the threshold
+                stabilityTimer.reset();
+            }
         }
 
+        // Stop all motors after reaching the target position and stabilizing
+        frontLeft.setPower(0);
+        backLeft.setPower(0);
+        frontRight.setPower(0);
+        backRight.setPower(0);
     }
+
 
 }

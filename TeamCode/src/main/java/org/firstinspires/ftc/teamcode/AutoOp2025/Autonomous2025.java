@@ -27,6 +27,7 @@ public class Autonomous2025 extends LinearOpMode {
     static final double     COUNTS_PER_INCH         = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) /
             (WHEEL_DIAMETER_INCHES * 3.1415); // Translation of Motor Ticks Into Real Inches
     static final double MAX_WHEEL_POWER = 1;  // Will not allow motor power to go above this value
+                                              // Is not globally applied to power
 
     PIDController drive = new PIDController(.05 , 0, 0);
 
@@ -72,10 +73,15 @@ public class Autonomous2025 extends LinearOpMode {
         backRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
 
         waitForStart();
+
         DriveToPositionByPID(36, drive);
 
     }
 
+    // Uses a PID controller to drive in a straight line to a position in inches
+    // Only uses motor data from a single motor so may require tweaking
+    // Uses variables stabilityTime and stabilityThreshold to determine when
+    // a stable state has been reached
     public void DriveToPositionByPID(double inches, PIDController driver) {
         // Add a timer to track how long the error has stayed within the threshold
         ElapsedTime stabilityTimer = new ElapsedTime();

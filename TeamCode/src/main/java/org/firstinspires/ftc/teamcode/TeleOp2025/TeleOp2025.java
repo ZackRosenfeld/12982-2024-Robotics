@@ -32,7 +32,7 @@ public class TeleOp2025 extends OpMode {
         double y = -gamepad1.left_stick_y; //reverse the y stick
         double x = gamepad1.left_stick_x;
         double rx = gamepad1.right_stick_x;
-        double speedControl = 1.5;
+        double speedControl = 1.3;
 
         //mechanics
         double frontLeftPower = (y + x + rx)/speedControl;
@@ -83,10 +83,6 @@ public class TeleOp2025 extends OpMode {
             clawServo.setPosition(0.7);
         }
         //SET BACK TO ZERO NO MORE MOVEMENT
-        frontLeft.setPower(0);
-        frontRight.setPower(0);
-        backLeft.setPower(0);
-        backRight.setPower(0);
         lin1.setPower(0);
         lin2.setPower(0);
     }

@@ -26,10 +26,12 @@ public class PIDController {
         double error = target - currentPosition;
         integralSum += error * timer.seconds();
         double derivative = (error - lastError) / timer.seconds();
-        lastError = error;
 
+        double output = ((error * Kp) + (integralSum * Ki) + (derivative * Kd));
+
+        lastError = error;
         timer.reset();
 
-        return ((error * Kp) + (derivative * Kd) + (integralSum * Ki));
+        return output;
     }
 }

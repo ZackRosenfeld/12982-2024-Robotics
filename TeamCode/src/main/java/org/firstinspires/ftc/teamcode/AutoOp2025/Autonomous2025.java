@@ -60,6 +60,11 @@ public class Autonomous2025 extends LinearOpMode {
         //lin2.setDirection(DcMotor.Direction.REVERSE);
         //clawMotor.setDirection(DcMotor.Direction.FORWARD);
 
+        frontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        backLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        frontRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        backRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
         // changing motor settings
         // Using run without encoder will not actualy disable the ability to
         // Use encoders, but will disable the ability to get the velocity of a motor
@@ -86,36 +91,64 @@ public class Autonomous2025 extends LinearOpMode {
         waitForStart();
 
         DriveToPositionByPID(36, drive);
+        StrafeToPositionByPid(36, drive);
 
     }
 
-    // Uses a PID controller to drive in a straight line to a position in inches
+
+    // Uses a PID controller to drive in a straight line right to a position in inches
     // Only uses motor data from a single motor so may require tweaking
     // Uses variables stabilityTime and stabilityThreshold to determine when
     // a stable state has been reached
-    public void DriveToPositionByPID(double inches, PIDController driver) {
+    public void StrafeToPositionByPID(double inches, PIDController driver) {
         // Add a timer to track how long the error has stayed within the threshold
         ElapsedTime stabilityTimer = new ElapsedTime();
         double stabilityThreshold = 0.1; // The acceptable range of error (inches)
         double stabilityTime = 0.5; // Time (in seconds) the error must remain within threshold to be considered stable
 
         while (opModeIsActive()) {
-            double currentPosition = frontLeft.getCurrentPosition() / COUNTS_PER_INCH;
-            double error = Math.abs(inches - currentPosition);
+            double frontRightPosition = frontRight.getCurrentPosition() / COUNTS_PER_INCH;
+            double frontLeftPosition = frontLeft.getCurrentPosition() / COUNTS_PER_INCH;
+            double backRightPosition = backRight.getCurrentPosition() / COUNTS_PER_INCH;
+            double backLeftPosition = backLeft.getCurrentPosition() / COUNTS_PER_INCH;
 
             // PID control output
-            double power = driver.PIDControl(inches, currentPosition);
+            double frontLeftPower = driver.PIDControl(inches, frontLeftPosition);
+            double backLeftPower = driver.PIDControl(-inches, backLeftPosition);
+            double frontRightPower = driver.PIDControl(-inches, frontRightPosition);
+            double backRightPower = driver.PIDControl(inches, backRightPosition);
 
             // Limit max power
-            if (power > MAX_WHEEL_POWER) {
-                power = MAX_WHEEL_POWER;
+            if (frontLeftPower > MAX_WHEEL_POWER) {
+                frontLeftPower = MAX_WHEEL_POWER;
+            }
+            else if (frontLeftPower < -MAX_WHEEL_POWER) {
+                frontLeftPower = -MAX_WHEEL_POWER;
+            }
+            if (backLeftPower > MAX_WHEEL_POWER) {
+                backLeftPower = MAX_WHEEL_POWER;
+            }
+            else if (backLeftPower < -MAX_WHEEL_POWER) {
+                backLeftPower = -MAX_WHEEL_POWER;
+            }
+            if (frontRightPower > MAX_WHEEL_POWER) {
+                frontRightPower = MAX_WHEEL_POWER;
+            }
+            else if (frontRightPower < -MAX_WHEEL_POWER) {
+                frontRightPower = -MAX_WHEEL_POWER;
+            }
+            if (backRightPower > MAX_WHEEL_POWER) {
+                backRightPower = MAX_WHEEL_POWER;
+            }
+            else if (backRightPower < -MAX_WHEEL_POWER) {
+                backRightPower = -MAX_WHEEL_POWER;
             }
 
             // Set motor power
-            frontLeft.setPower(power);
-            backLeft.setPower(power);
-            frontRight.setPower(power);
-            backRight.setPower(power);
+            frontLeft.setPower(frontLeftPower);
+            backLeft.setPower(backLeftPower);
+            frontRight.setPower(frontRightPower);
+            backRight.setPower(backRightPower);
 
             // Optional for testing and diagnosing issues
             telemetry.addData("Wheel Power: ", power);
@@ -126,7 +159,9 @@ public class Autonomous2025 extends LinearOpMode {
             telemetry.update();
 
             // Check if the error is within the threshold
-            if (error < stabilityThreshold) {
+            if (frontLeftPosition - inches < stabilityThreshold && backLeftPosition + inches < stabilityThreshold
+                    && frontRightPosition + inches < stabilityThreshold
+                    && backRightPosition - inches < stabilityThreshold) {
                 if (stabilityTimer.seconds() >= stabilityTime) {
                     // If error has been stable for enough time, exit the loop
                     break;
@@ -142,6 +177,106 @@ public class Autonomous2025 extends LinearOpMode {
         backLeft.setPower(0);
         frontRight.setPower(0);
         backRight.setPower(0);
+
+        frontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        backLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        frontRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        backRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+        frontLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        backLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        frontRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        backRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+    }
+
+
+    public void DriveToPositionByPID(double inches, PIDController driver) {
+        // Add a timer to track how long the error has stayed within the threshold
+        ElapsedTime stabilityTimer = new ElapsedTime();
+        double stabilityThreshold = 0.1; // The acceptable range of error (inches)
+        double stabilityTime = 0.5; // Time (in seconds) the error must remain within threshold to be considered stable
+
+        while (opModeIsActive()) {
+            double frontRightPosition = frontRight.getCurrentPosition() / COUNTS_PER_INCH;
+            double frontLeftPosition = frontLeft.getCurrentPosition() / COUNTS_PER_INCH;
+            double backRightPosition = backRight.getCurrentPosition() / COUNTS_PER_INCH;
+            double backLeftPosition = backLeft.getCurrentPosition() / COUNTS_PER_INCH;
+
+            // PID control output
+            double frontLeftPower = driver.PIDControl(inches, frontLeftPosition);
+            double backLeftPower = driver.PIDControl(inches, backLeftPosition);
+            double frontRightPower = driver.PIDControl(inches, frontRightPosition);
+            double backRightPower = driver.PIDControl(inches, backRightPosition);
+
+            // Limit max power
+            if (frontLeftPower > MAX_WHEEL_POWER) {
+                frontLeftPower = MAX_WHEEL_POWER;
+            }
+            else if (frontLeftPower < -MAX_WHEEL_POWER) {
+                frontLeftPower = -MAX_WHEEL_POWER;
+            }
+            if (backLeftPower > MAX_WHEEL_POWER) {
+                backLeftPower = MAX_WHEEL_POWER;
+            }
+            else if (backLeftPower < -MAX_WHEEL_POWER) {
+                backLeftPower = -MAX_WHEEL_POWER;
+            }
+            if (frontRightPower > MAX_WHEEL_POWER) {
+                frontRightPower = MAX_WHEEL_POWER;
+            }
+            else if (frontRightPower < -MAX_WHEEL_POWER) {
+                frontRightPower = -MAX_WHEEL_POWER;
+            }
+            if (backRightPower > MAX_WHEEL_POWER) {
+                backRightPower = MAX_WHEEL_POWER;
+            }
+            else if (backRightPower < -MAX_WHEEL_POWER) {
+                backRightPower = -MAX_WHEEL_POWER;
+            }
+
+            // Set motor power
+            frontLeft.setPower(frontLeftPower);
+            backLeft.setPower(backLeftPower);
+            frontRight.setPower(frontRightPower);
+            backRight.setPower(backRightPower);
+
+            // Optional for testing and diagnosing issues
+            telemetry.addData("Wheel Power: ", power);
+            telemetry.addData("Front Left Position: ", frontLeft.getCurrentPosition());
+            telemetry.addData("Front Right Position: ", frontRight.getCurrentPosition());
+            telemetry.addData("Back Left Position: ", backLeft.getCurrentPosition());
+            telemetry.addData("Back Right Position: ", backRight.getCurrentPosition());
+            telemetry.update();
+
+            // Check if the error is within the threshold
+            if (frontLeftPosition - inches < stabilityThreshold && backLeftPosition - inches < stabilityThreshold
+                    && frontRightPosition - inches < stabilityThreshold
+                    && backRightPosition - inches < stabilityThreshold) {
+                if (stabilityTimer.seconds() >= stabilityTime) {
+                    // If error has been stable for enough time, exit the loop
+                    break;
+                }
+            } else {
+                // Reset the timer if the error goes above the threshold
+                stabilityTimer.reset();
+            }
+        }
+
+        // Stop all motors after reaching the target position and stabilizing
+        frontLeft.setPower(0);
+        backLeft.setPower(0);
+        frontRight.setPower(0);
+        backRight.setPower(0);
+
+        frontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        backLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        frontRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        backRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+        frontLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        backLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        frontRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        backRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     }
 
 

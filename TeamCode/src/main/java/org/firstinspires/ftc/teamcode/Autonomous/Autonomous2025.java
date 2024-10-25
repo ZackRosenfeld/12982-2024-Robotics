@@ -24,6 +24,11 @@ public class Autonomous2025 extends LinearOpMode {
     private DcMotor clawMotor;
     private Servo clawServo;
 
+    RevHubOrientationOnRobot.LogoFacingDirection logoDirection = RevHubOrientationOnRobot.LogoFacingDirection.FORWARD;
+    RevHubOrientationOnRobot.UsbFacingDirection  usbDirection  = RevHubOrientationOnRobot.UsbFacingDirection.UP;
+
+    RevHubOrientationOnRobot orientationOnRobot = new RevHubOrientationOnRobot(logoDirection, usbDirection);
+
     static final double     COUNTS_PER_MOTOR_REV    = 537.6 ;
     static final double     DRIVE_GEAR_REDUCTION    = 1.0 ;     // No External Gearing.
     static final double     WHEEL_DIAMETER_INCHES   = 4.0 ;     // For figuring circumference
@@ -37,6 +42,7 @@ public class Autonomous2025 extends LinearOpMode {
     @Override
     public void runOpMode() {
 
+        // Intializing hardward
         frontLeft = hardwareMap.get(DcMotor.class, "leftFrontDrive");
         frontRight = hardwareMap.get(DcMotor.class, "rightFrontDrive");
         backLeft = hardwareMap.get(DcMotor.class, "leftBackDrive");
@@ -45,6 +51,7 @@ public class Autonomous2025 extends LinearOpMode {
         //lin2 = hardwareMap.get(DcMotor.class, "linearSlide2");
         //clawMotor = hardwareMap.get(DcMotor.class, "clawClawMotor");
         //clawServo = hardwareMap.get(Servo.class, "clawClawServo");
+        imu.initialize(new IMU.Parameters(orientationOnRobot));
         telemetry.addData("Hardware: ", "Initialized");
 
         // Setting motor directions, tweak as needed
@@ -62,6 +69,10 @@ public class Autonomous2025 extends LinearOpMode {
         backRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
         // changing motor settings
+        // Using run without encoder will not actualy disable the ability to
+        // Use encoders, but will disable the ability to get the velocity of a motor
+        // This isn't necessary because a rough approximation will work and this
+        // mode lets the motors run faster
         frontLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         backLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         frontRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);

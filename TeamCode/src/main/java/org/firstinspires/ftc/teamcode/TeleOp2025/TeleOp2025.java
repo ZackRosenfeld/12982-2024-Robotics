@@ -21,24 +21,29 @@ public class TeleOp2025 extends OpMode {
         frontRight = hardwareMap.get(DcMotor.class, "rightFrontDrive");
         backLeft = hardwareMap.get(DcMotor.class, "leftBackDrive");
         backRight = hardwareMap.get(DcMotor.class, "rightBackDrive");
-        lin1 = hardwareMap.get(DcMotor.class, "linearSlide1");
+        /* lin1 = hardwareMap.get(DcMotor.class, "linearSlide1");
         lin2 = hardwareMap.get(DcMotor.class, "linearSlide2");
         clawMotor = hardwareMap.get(DcMotor.class, "clawClawMotor");
-        clawServo = hardwareMap.get(Servo.class, "clawClawServo");
+        clawServo = hardwareMap.get(Servo.class, "clawClawServo"); */
         telemetry.addData("Hardware: ", "Initialized");
     }
     @Override
     public void loop(){
-        double y = -gamepad1.left_stick_y; //reverse the y stick
-        double x = gamepad1.left_stick_x;
+        frontRight.setDirection(DcMotor.Direction.REVERSE);
+        backRight.setDirection(DcMotor.Direction.REVERSE);
+
+        double a = -gamepad1.left_stick_y; //reverse the y stick
+        double l = gamepad1.left_stick_x;
         double rx = gamepad1.right_stick_x;
-        double speedControl = 1.3;
+        double speedControl = Math.max(Math.abs(a) + Math.abs(l) + Math.abs(rx), 1);
 
         //mechanics
-        double frontLeftPower = (y + x + rx)/speedControl;
-        double backLeftPower = (y - x + rx)/speedControl;
-        double frontRightPower = (-(y - x - rx))/speedControl;
-        double backRightPower = (-(y + x - rx))/speedControl;
+        double frontLeftPower = (a + l + rx)/speedControl;
+        double backLeftPower = (a - l + rx)/speedControl;
+        double frontRightPower = (a - l - rx)/speedControl;
+        double backRightPower = (a + l - rx)/speedControl;
+
+
 
         //basic drive
         frontLeft.setPower(frontLeftPower);
@@ -46,13 +51,16 @@ public class TeleOp2025 extends OpMode {
         frontRight.setPower(frontRightPower);
         backRight.setPower(backRightPower);
 
-        //rotations
-        frontLeft.setPower(y + rx);
-        backLeft.setPower(y + rx);
-        frontRight.setPower(-(y - rx));
-        backRight.setPower(-(y - rx));
 
-        //linear slide time
+        //EMERGENCY BRAKE
+        if ((gamepad1.left_trigger > 0 && gamepad1.right_trigger >0) || (gamepad2.left_trigger > 0 && gamepad2.right_trigger > 0)) {
+            frontLeft.setPower(0);
+            backLeft.setPower(0);
+            frontRight.setPower(0);
+            backRight.setPower(0);
+        }
+
+        /* //linear slide time
         if (gamepad2.left_stick_y > 0)
         {
             lin1.setPower(speed);
@@ -84,6 +92,6 @@ public class TeleOp2025 extends OpMode {
         }
         //SET BACK TO ZERO NO MORE MOVEMENT
         lin1.setPower(0);
-        lin2.setPower(0);
+        lin2.setPower(0); */
     }
 }

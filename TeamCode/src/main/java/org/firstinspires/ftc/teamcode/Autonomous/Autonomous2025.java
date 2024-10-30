@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.Autonomous;
 
+import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -9,7 +10,9 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 //import com.sun.tools.javac.tree.DCTree;
 
+// These 2
 import org.firstinspires.ftc.teamcode.Autonomous.funWorld.PIDController;
+import java.util.List;
 
 @Autonomous(name="Autonomous2025")
 public class Autonomous2025 extends LinearOpMode {
@@ -24,11 +27,6 @@ public class Autonomous2025 extends LinearOpMode {
     private DcMotor clawMotor;
     private Servo clawServo;
 
-    RevHubOrientationOnRobot.LogoFacingDirection logoDirection = RevHubOrientationOnRobot.LogoFacingDirection.FORWARD;
-    RevHubOrientationOnRobot.UsbFacingDirection  usbDirection  = RevHubOrientationOnRobot.UsbFacingDirection.UP;
-
-    RevHubOrientationOnRobot orientationOnRobot = new RevHubOrientationOnRobot(logoDirection, usbDirection);
-
     static final double     COUNTS_PER_MOTOR_REV    = 537.6 ;
     static final double     DRIVE_GEAR_REDUCTION    = 1.0 ;     // No External Gearing.
     static final double     WHEEL_DIAMETER_INCHES   = 4.0 ;     // For figuring circumference
@@ -37,7 +35,7 @@ public class Autonomous2025 extends LinearOpMode {
     static final double MAX_WHEEL_POWER = 1;  // Will not allow motor power to go above this value
                                               // Is not globally applied to power
 
-    PIDController drive = new PIDController(.05 , 0, 0);
+    PIDController drive = new PIDController(.07 , 0, 0);
 
     @Override
     public void runOpMode() {
@@ -51,7 +49,14 @@ public class Autonomous2025 extends LinearOpMode {
         //lin2 = hardwareMap.get(DcMotor.class, "linearSlide2");
         //clawMotor = hardwareMap.get(DcMotor.class, "clawClawMotor");
         //clawServo = hardwareMap.get(Servo.class, "clawClawServo");
-        imu.initialize(new IMU.Parameters(orientationOnRobot));
+
+        // Utilizing bulk reads to speed up code processing
+        List<LynxModule> allHubs = hardwareMap.getAll(LynxModule.class);
+
+        for (LynxModule hub : allHubs) {
+            hub.setBulkCachingMode(LynxModule.BulkCachingMode.AUTO);
+        }
+
         telemetry.addData("Hardware: ", "Initialized");
 
         // Setting motor directions, tweak as needed
@@ -94,7 +99,7 @@ public class Autonomous2025 extends LinearOpMode {
         waitForStart();
 
         DriveToPositionByPID(36, drive);
-        StrafeToPositionByPid(36, drive);
+        StrafeToPositionByPID(36, drive);
 
     }
 
@@ -154,7 +159,6 @@ public class Autonomous2025 extends LinearOpMode {
             backRight.setPower(backRightPower);
 
             // Optional for testing and diagnosing issues
-            telemetry.addData("Wheel Power: ", power);
             telemetry.addData("Front Left Position: ", frontLeft.getCurrentPosition());
             telemetry.addData("Front Right Position: ", frontRight.getCurrentPosition());
             telemetry.addData("Back Left Position: ", backLeft.getCurrentPosition());
@@ -244,7 +248,6 @@ public class Autonomous2025 extends LinearOpMode {
             backRight.setPower(backRightPower);
 
             // Optional for testing and diagnosing issues
-            telemetry.addData("Wheel Power: ", power);
             telemetry.addData("Front Left Position: ", frontLeft.getCurrentPosition());
             telemetry.addData("Front Right Position: ", frontRight.getCurrentPosition());
             telemetry.addData("Back Left Position: ", backLeft.getCurrentPosition());

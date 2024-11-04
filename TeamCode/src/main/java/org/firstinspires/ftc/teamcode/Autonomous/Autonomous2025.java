@@ -1,16 +1,16 @@
 package org.firstinspires.ftc.teamcode.Autonomous;
 
 import com.qualcomm.hardware.lynx.LynxModule;
+import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.Servo;
-
 import com.qualcomm.robotcore.util.ElapsedTime;
-
-//import com.sun.tools.javac.tree.DCTree;
-
-// These 2
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.AngularVelocity;
+import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 import org.firstinspires.ftc.teamcode.Autonomous.funWorld.PIDController;
 import java.util.List;
 
@@ -26,6 +26,7 @@ public class Autonomous2025 extends LinearOpMode {
     private DcMotor lin2;
     private DcMotor clawMotor;
     private Servo clawServo;
+    private IMU imu;
 
     static final double     COUNTS_PER_MOTOR_REV    = 537.6 ;
     static final double     DRIVE_GEAR_REDUCTION    = 1.0 ;     // No External Gearing.
@@ -49,6 +50,7 @@ public class Autonomous2025 extends LinearOpMode {
         //lin2 = hardwareMap.get(DcMotor.class, "linearSlide2");
         //clawMotor = hardwareMap.get(DcMotor.class, "clawClawMotor");
         //clawServo = hardwareMap.get(Servo.class, "clawClawServo");
+        imu = hardwareMap.get(IMU.class, "imu");
 
         // Utilizing bulk reads to speed up code processing
         List<LynxModule> allHubs = hardwareMap.getAll(LynxModule.class);
@@ -95,6 +97,14 @@ public class Autonomous2025 extends LinearOpMode {
         backLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
         frontRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
         backRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+
+        // IMU orientation setup
+        RevHubOrientationOnRobot.LogoFacingDirection logoDirection = RevHubOrientationOnRobot.LogoFacingDirection.FORWARD;
+        RevHubOrientationOnRobot.UsbFacingDirection  usbDirection  = RevHubOrientationOnRobot.UsbFacingDirection.UP;
+
+        RevHubOrientationOnRobot orientationOnRobot = new RevHubOrientationOnRobot(logoDirection, usbDirection);
+
+        imu.initialize(new IMU.Parameters(orientationOnRobot));
 
         waitForStart();
 
@@ -266,6 +276,63 @@ public class Autonomous2025 extends LinearOpMode {
                 // Reset the timer if the error goes above the threshold
                 stabilityTimer.reset();
             }
+        }
+
+        // Stop all motors after reaching the target position and stabilizing
+        frontLeft.setPower(0);
+        backLeft.setPower(0);
+        frontRight.setPower(0);
+        backRight.setPower(0);
+
+        frontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        backLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        frontRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        backRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+        frontLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        backLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        frontRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        backRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+    }
+
+    public void TurnByPID(double degrees, PIDController turner) {
+        // Add a timer to track how long the error has stayed within the threshold
+        ElapsedTime stabilityTimer = new ElapsedTime();
+        double stabilityThreshold = 1; // The acceptable range of error (degrees)
+        double stabilityTime = 0.5; // Time (in seconds) the error must remain within threshold to be considered stable
+
+        while (opModeIsActive()) {
+
+            // Get the angles from the IMU and store the Yaw as angle
+            YawPitchRollAngles orientation = imu.getRobotYawPitchRollAngles();
+
+            double currentAngle = orientation.getYaw();
+
+            double power = turner.PIDControl(degrees, currentAngle);
+
+            if (power > MAX_WHEEL_POWER) {
+                power = MAX_WHEEL_POWER;
+            }
+            else if (power < -MAX_WHEEL_POWER) {
+                power = -MAX_WHEEL_POWER;
+            }
+
+            // Sending power to the motors. Make sure Left is being driven foward and Right is being driven backwards for a positive angle. otherwise flip the signs
+            frontLeft.setPower(power);
+            backLeft.setPower(power);
+            frontRight.setPower(-power);
+            backRight.setPower(-power);
+
+            if (Math.abs(degrees - currentAngle) < stabilityThreshold) {
+                if (stabilityTimer.seconds() >= stabilityTime) {
+                    // If error has been stable for enough time, exit the loop
+                    break;
+                }
+            } else {
+                // Reset the timer if the error goes above the threshold
+                stabilityTimer.reset();
+            }
+
         }
 
         // Stop all motors after reaching the target position and stabilizing

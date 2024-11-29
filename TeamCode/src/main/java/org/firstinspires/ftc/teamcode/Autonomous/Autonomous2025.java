@@ -28,15 +28,21 @@ public class Autonomous2025 extends LinearOpMode {
     private Servo clawServo;
     private IMU imu;
 
-    static final double     COUNTS_PER_MOTOR_REV    = 537.6 ;
+    static final double     COUNTS_PER_MOTOR_REV_DRIVE    = 537.6 ;
     static final double     DRIVE_GEAR_REDUCTION    = 1.0 ;     // No External Gearing.
     static final double     WHEEL_DIAMETER_INCHES   = 4.0 ;     // For figuring circumference
-    static final double     COUNTS_PER_INCH         = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) /
+    static final double     COUNTS_PER_INCH_DRIVE         = (COUNTS_PER_MOTOR_REV_DRIVE * DRIVE_GEAR_REDUCTION) /
             (WHEEL_DIAMETER_INCHES * 3.1415); // Translation of Motor Ticks Into Real Inches
-    static final double MAX_WHEEL_POWER = 1;  // Will not allow motor power to go above this value
+    static final double MAX_WHEEL_POWER = .8;  // Will not allow motor power to go above this value
+                                              // Is not globally applied to power
+    static final double INCHES_PER_REV_SLIDES = 4.72441; // Used to calculate counts per inch for the linear slides
+    static final double COUNTS_PER_MOTOR_REV_SLIDES = 5700.4;
+    static final double COUNTS_PER_INCH_SLIDES = INCHES_PER_REV_SLIDES / COUNTS_PER_MOTOR_REV_SLIDES;
+    static final double MAX_SLIDE_POWER = .5; // Will not allow slide motor power to exceed this value
                                               // Is not globally applied to power
 
     PIDController drive = new PIDController(.07 , 0, 0);
+    PIDController turn = new PIDController(.01, 0, 0);
 
     @Override
     public void runOpMode() {
@@ -46,8 +52,8 @@ public class Autonomous2025 extends LinearOpMode {
         frontRight = hardwareMap.get(DcMotor.class, "rightFrontDrive");
         backLeft = hardwareMap.get(DcMotor.class, "leftBackDrive");
         backRight = hardwareMap.get(DcMotor.class, "rightBackDrive");
-        //lin1 = hardwareMap.get(DcMotor.class, "linearSlide1");
-        //lin2 = hardwareMap.get(DcMotor.class, "linearSlide2");
+        lin1 = hardwareMap.get(DcMotor.class, "linearSlide1");
+        lin2 = hardwareMap.get(DcMotor.class, "linearSlide2");
         //clawMotor = hardwareMap.get(DcMotor.class, "clawClawMotor");
         //clawServo = hardwareMap.get(Servo.class, "clawClawServo");
         imu = hardwareMap.get(IMU.class, "imu");
@@ -66,14 +72,16 @@ public class Autonomous2025 extends LinearOpMode {
         backLeft.setDirection(DcMotor.Direction.FORWARD);
         frontRight.setDirection(DcMotor.Direction.REVERSE);
         backRight.setDirection(DcMotor.Direction.REVERSE);
-        //lin1.setDirection(DcMotor.Direction.FORWARD);
-        //lin2.setDirection(DcMotor.Direction.REVERSE);
+        lin1.setDirection(DcMotor.Direction.FORWARD);
+        lin2.setDirection(DcMotor.Direction.REVERSE);
         //clawMotor.setDirection(DcMotor.Direction.FORWARD);
 
         frontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         backLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         frontRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         backRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        lin1.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        lin2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
         // changing motor settings
         // Using run without encoder will not actualy disable the ability to
@@ -84,6 +92,8 @@ public class Autonomous2025 extends LinearOpMode {
         backLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         frontRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         backRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        lin1.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        lin2.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         // Im not sure which zero power behavior I will want so I will leave both for easy testing
         /*
@@ -92,6 +102,8 @@ public class Autonomous2025 extends LinearOpMode {
         frontRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         backRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         */
+        lin1.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        lin2.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         frontLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
         backLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
@@ -110,12 +122,12 @@ public class Autonomous2025 extends LinearOpMode {
 
         DriveToPositionByPID(36, drive);
         StrafeToPositionByPID(36, drive);
+        TurnByPID(90, turn);
 
     }
 
 
     // Uses a PID controller to drive in a straight line right to a position in inches
-    // Only uses motor data from a single motor so may require tweaking
     // Uses variables stabilityTime and stabilityThreshold to determine when
     // a stable state has been reached
     public void StrafeToPositionByPID(double inches, PIDController driver) {
@@ -125,10 +137,10 @@ public class Autonomous2025 extends LinearOpMode {
         double stabilityTime = 0.5; // Time (in seconds) the error must remain within threshold to be considered stable
 
         while (opModeIsActive()) {
-            double frontRightPosition = frontRight.getCurrentPosition() / COUNTS_PER_INCH;
-            double frontLeftPosition = frontLeft.getCurrentPosition() / COUNTS_PER_INCH;
-            double backRightPosition = backRight.getCurrentPosition() / COUNTS_PER_INCH;
-            double backLeftPosition = backLeft.getCurrentPosition() / COUNTS_PER_INCH;
+            double frontRightPosition = frontRight.getCurrentPosition() / COUNTS_PER_INCH_DRIVE;
+            double frontLeftPosition = frontLeft.getCurrentPosition() / COUNTS_PER_INCH_DRIVE;
+            double backRightPosition = backRight.getCurrentPosition() / COUNTS_PER_INCH_DRIVE;
+            double backLeftPosition = backLeft.getCurrentPosition() / COUNTS_PER_INCH_DRIVE;
 
             // PID control output
             double frontLeftPower = driver.PIDControl(inches, frontLeftPosition);
@@ -176,10 +188,10 @@ public class Autonomous2025 extends LinearOpMode {
             telemetry.update();
 
             // Check if the error is within the threshold
-            if (frontLeftPosition - inches < stabilityThreshold && backLeftPosition + inches < stabilityThreshold
-                    && frontRightPosition + inches < stabilityThreshold
-                    && backRightPosition - inches < stabilityThreshold) {
-                if (stabilityTimer.seconds() >= stabilityTime) {
+            if (Math.abs(frontLeftPosition - inches) < stabilityThreshold && Math.abs(backLeftPosition + inches) < stabilityThreshold
+                    && Math.abs(frontRightPosition + inches) < stabilityThreshold
+                    && Math.abs(backRightPosition - inches) < stabilityThreshold) {
+                if (stabilityTimer.seconds() > stabilityTime) {
                     // If error has been stable for enough time, exit the loop
                     break;
                 }
@@ -206,7 +218,9 @@ public class Autonomous2025 extends LinearOpMode {
         backRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     }
 
-
+    // Uses a PID controller to drive in a straight line forward to a position in inches
+    // Uses variables stabilityTime and stabilityThreshold to determine when
+    // a stable state has been reached
     public void DriveToPositionByPID(double inches, PIDController driver) {
         // Add a timer to track how long the error has stayed within the threshold
         ElapsedTime stabilityTimer = new ElapsedTime();
@@ -214,10 +228,10 @@ public class Autonomous2025 extends LinearOpMode {
         double stabilityTime = 0.5; // Time (in seconds) the error must remain within threshold to be considered stable
 
         while (opModeIsActive()) {
-            double frontRightPosition = frontRight.getCurrentPosition() / COUNTS_PER_INCH;
-            double frontLeftPosition = frontLeft.getCurrentPosition() / COUNTS_PER_INCH;
-            double backRightPosition = backRight.getCurrentPosition() / COUNTS_PER_INCH;
-            double backLeftPosition = backLeft.getCurrentPosition() / COUNTS_PER_INCH;
+            double frontRightPosition = frontRight.getCurrentPosition() / COUNTS_PER_INCH_DRIVE;
+            double frontLeftPosition = frontLeft.getCurrentPosition() / COUNTS_PER_INCH_DRIVE;
+            double backRightPosition = backRight.getCurrentPosition() / COUNTS_PER_INCH_DRIVE;
+            double backLeftPosition = backLeft.getCurrentPosition() / COUNTS_PER_INCH_DRIVE;
 
             // PID control output
             double frontLeftPower = driver.PIDControl(inches, frontLeftPosition);
@@ -265,10 +279,10 @@ public class Autonomous2025 extends LinearOpMode {
             telemetry.update();
 
             // Check if the error is within the threshold
-            if (frontLeftPosition - inches < stabilityThreshold && backLeftPosition - inches < stabilityThreshold
-                    && frontRightPosition - inches < stabilityThreshold
-                    && backRightPosition - inches < stabilityThreshold) {
-                if (stabilityTimer.seconds() >= stabilityTime) {
+            if (Math.abs(frontLeftPosition - inches) < stabilityThreshold && Math.abs(backLeftPosition - inches) < stabilityThreshold
+                    && Math.abs(frontRightPosition - inches) < stabilityThreshold
+                    && Math.abs(backRightPosition - inches) < stabilityThreshold) {
+                if (stabilityTimer.seconds() > stabilityTime) {
                     // If error has been stable for enough time, exit the loop
                     break;
                 }
@@ -295,6 +309,8 @@ public class Autonomous2025 extends LinearOpMode {
         backRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     }
 
+    // Uses a PID controller as well as data from the onboard control hub IMU
+    // To turn a specified number of degrees in place
     public void TurnByPID(double degrees, PIDController turner) {
         // Add a timer to track how long the error has stayed within the threshold
         ElapsedTime stabilityTimer = new ElapsedTime();
@@ -317,7 +333,7 @@ public class Autonomous2025 extends LinearOpMode {
                 power = -MAX_WHEEL_POWER;
             }
 
-            // Sending power to the motors. Make sure Left is being driven foward and Right is being driven backwards for a positive angle. otherwise flip the signs
+            // Sending power to the motors. Make sure Left is being driven forward and Right is being driven backwards for a positive angle. otherwise flip the signs
             frontLeft.setPower(power);
             backLeft.setPower(power);
             frontRight.setPower(-power);
@@ -352,5 +368,50 @@ public class Autonomous2025 extends LinearOpMode {
         backRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     }
 
+    public void MoveLinearSlideByPID(double inches, PIDController lifter) {
+        // Add a timer to track how long the error has stayed within the threshold
+        ElapsedTime stabilityTimer = new ElapsedTime();
+        double stabilityThreshold = 0.1; // The acceptable range of error (inches)
+        double stabilityTime = 0.5; // Time (in seconds) the error must remain within threshold to be considered stable
+
+        while (opModeIsActive()) {
+            double linPosition = lin1.getCurrentPosition() / COUNTS_PER_INCH_SLIDES;
+
+            // PID control output
+            double linPower = lifter.PIDControl(inches, linPosition);
+
+            if (linPower > MAX_SLIDE_POWER) {
+                linPower = MAX_SLIDE_POWER;
+            }
+            else if (linPower < -MAX_SLIDE_POWER) {
+                linPower = -MAX_SLIDE_POWER;
+            }
+
+            // sending power to the slides
+            lin1.setPower(linPower);
+            lin2.setPower(linPower);
+
+            if (Math.abs(inches - linPosition) < stabilityThreshold) {
+                if (stabilityTimer.seconds() > stabilityTime) {
+                    // If error has been stable for enough time, exit the loop
+                    break;
+                }
+            }
+            else {
+                // Reset the timer if the error goes above the threshold
+                stabilityTimer.reset();
+            }
+        }
+
+        // Stop all motors after reaching the target position and stabilizing
+        lin1.setPower(0);
+        lin2.setPower(0);
+
+        lin1.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        lin2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+        lin1.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        lin2.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+    }
 
 }

@@ -26,6 +26,8 @@ public class Autonomous2025 extends LinearOpMode {
     private DcMotor lin2;
     private DcMotor clawMotor;
     private Servo clawServo;
+        static final double CLAW_CLOSED = 0;
+        static final double CLAW_OPEN = 1;
     private IMU imu;
 
     static final double     COUNTS_PER_MOTOR_REV_DRIVE    = 537.6 ;
@@ -36,14 +38,14 @@ public class Autonomous2025 extends LinearOpMode {
     static final double MAX_WHEEL_POWER = .8;  // Will not allow motor power to go above this value
                                               // Is not globally applied to power
     static final double INCHES_PER_REV_SLIDES = 4.72441; // Used to calculate counts per inch for the linear slides
-    static final double COUNTS_PER_MOTOR_REV_SLIDES = 5700.4;
+    static final double COUNTS_PER_MOTOR_REV_SLIDES = 2150.8;
     static final double COUNTS_PER_INCH_SLIDES = INCHES_PER_REV_SLIDES / COUNTS_PER_MOTOR_REV_SLIDES;
     static final double MAX_SLIDE_POWER = .5; // Will not allow slide motor power to exceed this value
                                               // Is not globally applied to power
 
     PIDController drive = new PIDController(.07 , 0, 0);
     PIDController turn = new PIDController(.01, 0, 0);
-
+    PIDController lift = new PIDController(.07 , 0, 0);
     @Override
     public void runOpMode() {
 
@@ -55,7 +57,7 @@ public class Autonomous2025 extends LinearOpMode {
         lin1 = hardwareMap.get(DcMotor.class, "linearSlide1");
         lin2 = hardwareMap.get(DcMotor.class, "linearSlide2");
         //clawMotor = hardwareMap.get(DcMotor.class, "clawClawMotor");
-        //clawServo = hardwareMap.get(Servo.class, "clawClawServo");
+        clawServo = hardwareMap.get(Servo.class, "clawClawServo");
         imu = hardwareMap.get(IMU.class, "imu");
 
         // Utilizing bulk reads to speed up code processing
@@ -123,6 +125,9 @@ public class Autonomous2025 extends LinearOpMode {
         DriveToPositionByPID(36, drive);
         StrafeToPositionByPID(36, drive);
         TurnByPID(90, turn);
+        MoveLinearSlideByPID(5, lift);
+        openClaw();
+        closeClaw();
 
     }
 
@@ -412,6 +417,14 @@ public class Autonomous2025 extends LinearOpMode {
 
         lin1.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         lin2.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+    }
+
+    public void closeClaw() {
+        clawServo.setPosition(CLAW_CLOSED);
+    }
+
+    public void openClaw() {
+        clawServo.setPosition(CLAW_OPEN);
     }
 
 }

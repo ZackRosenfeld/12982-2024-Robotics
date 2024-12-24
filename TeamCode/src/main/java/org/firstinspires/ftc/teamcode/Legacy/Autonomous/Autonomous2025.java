@@ -1,8 +1,9 @@
-package org.firstinspires.ftc.teamcode.Autonomous;
+package org.firstinspires.ftc.teamcode.Legacy.Autonomous;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
-@Autonomous(name="AutoTest")
+
+//@Autonomous(name="AutoTest")
 public class Autonomous2025 extends AutoJosh {
 
     @Override

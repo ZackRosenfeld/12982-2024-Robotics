@@ -39,44 +39,9 @@ public class RightSideAutonomous extends LinearOpMode {
         Claw claw = new Claw(hardwareMap);
         Lift lift = new Lift(hardwareMap);
 
-        // Drive Trajectories
-        TrajectoryActionBuilder pickupSpecimen = drive.actionBuilder(initialPose).
-                lineToY(11).
-                lineToY(9.3);
-
-        TrajectoryActionBuilder toSubmersibleInitial = drive.actionBuilder(new Pose2d(77.625, 9.3, Math.PI / 2))
-                .lineToY(31);
-
-        TrajectoryActionBuilder submersibleScoring = drive.actionBuilder(new Pose2d(77.625, 31, Math.PI / 2))
-                .lineToY(36);
-
-        TrajectoryActionBuilder strafeToObservasionZone = drive.actionBuilder(new Pose2d(77.625, 36, Math.PI / 2))
-                .strafeToLinearHeading(new Vector2d(87.5, 26), 0)
-                .strafeToLinearHeading(new Vector2d (133, 29), -Math.PI / 2);
-
-        TrajectoryActionBuilder forwardToSpecimen = drive.actionBuilder(new Pose2d(133, 29, -Math.PI / 2))
-                .waitSeconds(WAIT_SECONDS)
-                .lineToY(21.2);
-
-        TrajectoryActionBuilder backToSubmersible = drive.actionBuilder(new Pose2d(133, 21.2, -Math.PI / 2))
-                .splineToLinearHeading(new Pose2d(103, 28, 0), Math.PI)
-                .splineToLinearHeading(new Pose2d(73, 38, Math.PI / 2), Math.PI / 2);
 
         Actions.runBlocking(claw.startClaw());
 
         waitForStart();
-
-        Actions.runBlocking(new SequentialAction(pickupSpecimen.build(),
-                claw.closeClaw(),
-                new ParallelAction(toSubmersibleInitial.build(),
-                        lift.aboveHighBar()),
-                submersibleScoring.build(),
-                lift.scoringHighBar(),
-                new ParallelAction(strafeToObservasionZone.build(), lift.down(), claw.openClaw()),
-                forwardToSpecimen.build(),
-                claw.closeClaw(),
-                new ParallelAction(backToSubmersible.build(),
-                        lift.aboveHighBar()),
-                lift.scoringHighBar()));
     }
 }

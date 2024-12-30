@@ -35,7 +35,7 @@ public class TeleOp2025 extends OpMode {
     @Override
     public void loop(){
         backRight.setDirection(DcMotor.Direction.REVERSE);
-
+        lin1.setDirection(DcMotor.Direction.REVERSE);
         double a = -gamepad1.left_stick_y; //reverse the y stick
         double l = gamepad1.left_stick_x;
         double rx = gamepad1.right_stick_x;

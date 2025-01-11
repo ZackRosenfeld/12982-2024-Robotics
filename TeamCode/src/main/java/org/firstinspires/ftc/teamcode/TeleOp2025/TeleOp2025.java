@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.TeleOp2025;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 
 @TeleOp(name = "TeleOp2025")
@@ -36,10 +37,11 @@ public class TeleOp2025 extends OpMode {
     public void loop(){
         backRight.setDirection(DcMotor.Direction.REVERSE);
         lin1.setDirection(DcMotor.Direction.REVERSE);
+        lin2.setDirection(DcMotor.Direction.FORWARD);
         double a = -gamepad1.left_stick_y; //reverse the y stick
         double l = gamepad1.left_stick_x;
         double rx = gamepad1.right_stick_x;
-        double slideSpeed = 1;
+        double slideSpeed = .65;
         //double speedControl = Math.max(Math.abs(a) + Math.abs(l) + Math.abs(rx), 1);
 
         //slow mode
@@ -86,6 +88,10 @@ public class TeleOp2025 extends OpMode {
             lin1.setPower(-slideSpeed);
             lin2.setPower(-slideSpeed);
         }
+        else {
+            lin1.setPower(0);
+            lin2.setPower(0);
+        }
 
         //arm time
         /*if(gamepad2.right_stick_y > 0)
@@ -110,8 +116,8 @@ public class TeleOp2025 extends OpMode {
             clawServo.setPosition(0.3);
         }
         //SET BACK TO ZERO NO MORE MOVEMENT
-        lin1.setPower(0);
-        lin2.setPower(0);
+        //lin1.setPower(0);
+        //lin2.setPower(0);
         //clawMotor.setPower(0);
     }
 }

@@ -20,10 +20,10 @@ public class SpecimenPickupTest extends LinearOpMode {
 
     public static double FORWARD_INITIAL = 6;
     public static double BACKWARD_PICKUP = 5;
-    public static boolean SCORE_SPECIMEN = false;
-    public static double FORWARD_AFTER_PICKUP = 31;
+    public static boolean SCORE_SPECIMEN = true;
+    public static double FORWARD_AFTER_PICKUP = 28;
     public static double WAIT_SECONDS = 2;
-    public static double SCORING_POSITION = 36;
+    public static double SCORING_POSITION = 33;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -35,11 +35,10 @@ public class SpecimenPickupTest extends LinearOpMode {
                 .lineToY(FORWARD_INITIAL)
                 .lineToY(BACKWARD_PICKUP);
 
-        TrajectoryActionBuilder scoreMove = drive.actionBuilder(new Pose2d(0, BACKWARD_PICKUP, Math.PI / 2))
-                .lineToY(FORWARD_AFTER_PICKUP)
-                .waitSeconds(WAIT_SECONDS)
-                .lineToY(SCORING_POSITION);
+        TrajectoryActionBuilder moveToSubmersible = drive.actionBuilder(new Pose2d(0, BACKWARD_PICKUP, Math.PI / 2))
+                .lineToY(FORWARD_AFTER_PICKUP);
 
+        TrajectoryActionBuilder scoreMove = drive.actionBuilder(new Pose2d(0, FORWARD_AFTER_PICKUP, Math.PI / 2)).lineToY(SCORING_POSITION);
 
         Actions.runBlocking(claw.startClaw());
 
@@ -48,8 +47,9 @@ public class SpecimenPickupTest extends LinearOpMode {
         Actions.runBlocking(new SequentialAction(pickupMove.build(), claw.closeClaw()));
 
         if (SCORE_SPECIMEN) {
-            Actions.runBlocking(new SequentialAction( new ParallelAction(lift.aboveHighBar(),
-                            scoreMove.build()),
+            Actions.runBlocking(new SequentialAction(moveToSubmersible.build(),
+                    lift.aboveHighBar(),
+                    scoreMove.build(),
                     lift.scoringHighBar()));
         }
     }

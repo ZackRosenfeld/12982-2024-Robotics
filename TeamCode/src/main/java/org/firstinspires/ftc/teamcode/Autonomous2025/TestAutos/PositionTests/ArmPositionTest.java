@@ -2,8 +2,10 @@ package org.firstinspires.ftc.teamcode.Autonomous2025.TestAutos.PositionTests;
 
 import org.firstinspires.ftc.teamcode.Autonomous2025.mechanisms.Arm;
 import com.acmerobotics.roadrunner.ftc.Actions;
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
+@Autonomous(name = "ArmPositionTest")
 public class ArmPositionTest extends LinearOpMode{
 
     @Override
@@ -12,6 +14,8 @@ public class ArmPositionTest extends LinearOpMode{
 
         waitForStart();
 
-        Actions.runBlocking(arm.testPosition());
+        while (opModeIsActive()) {
+            Actions.runBlocking(arm.testPosition());
+        }
     }
 }

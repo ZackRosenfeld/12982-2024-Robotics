@@ -7,8 +7,10 @@ import org.firstinspires.ftc.teamcode.Autonomous2025.mechanisms.Lift;
 
 import com.acmerobotics.roadrunner.ParallelAction;
 import com.acmerobotics.roadrunner.ftc.Actions;
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
+@Autonomous(name = "CombinedPositionTest")
 public class CombinedPositionTest extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
@@ -17,11 +19,14 @@ public class CombinedPositionTest extends LinearOpMode {
         Wrist wrist = new Wrist(hardwareMap);
         Claw claw = new Claw(hardwareMap);
 
-        Actions.runBlocking(new ParallelAction(lift.testPosition(),
-                arm.testPosition(),
-                wrist.testPosition(),
-                claw.testPosition()));
-
         waitForStart();
+
+        while (opModeIsActive()) {
+            Actions.runBlocking(new ParallelAction(lift.testPosition(),
+                    arm.testPosition(),
+                    wrist.testPosition(),
+                    claw.testPosition()));
+        }
+
     }
 }

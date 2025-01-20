@@ -18,11 +18,12 @@ public class Lift {
 
     //movement constants
     public static double LIFT_POWER = 0.65; // power sent to lift motors
-    public static double COUNTS_PER_REV_LIFT = 2150.8/4;
-    public static double INCHES_PER_REV_LIFT = 4.72441;
-    public static double COUNTS_PER_INCH_LIFT = COUNTS_PER_REV_LIFT / INCHES_PER_REV_LIFT;
+    private static final double COUNTS_PER_REV_LIFT = 2150.8/4;
+    private static final double INCHES_PER_REV_LIFT = 4.72441;
+    private static final double COUNTS_PER_INCH_LIFT = COUNTS_PER_REV_LIFT / INCHES_PER_REV_LIFT;
 
     // positions
+    public static double TEST_POSITION = 0;
     public static double DOWN_POS = 0;
     public static double HIGH_BAR_POS = 26 * COUNTS_PER_INCH_LIFT;
     public static double HIGH_BAR_SCORING_POS = 15 * COUNTS_PER_INCH_LIFT;
@@ -53,7 +54,75 @@ public class Lift {
         lin2.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     }
 
+
+    /** Utilites **/
+
+    // returns true if either lift motor is powered
+    // otherwise returns false
+    public boolean isBusy() {
+        return lin1.isBusy() || lin2.isBusy();
+    }
+
+    // Position based utilities
+    public double getCurrentPositionLin1Ticks() {
+        return lin1.getCurrentPosition();
+    }
+
+    public double getCurrentPositionLin1Inches() {
+        return lin1.getCurrentPosition() / COUNTS_PER_INCH_LIFT;
+    }
+
+    public double getCurrentPositionLin2Ticks() {
+        return lin2.getCurrentPosition();
+    }
+
+    public double getCurrentPositionLin2Inches() {
+        return lin2.getCurrentPosition() / COUNTS_PER_INCH_LIFT;
+    }
+
+
     // Actions
+    public class TestPosition implements Action {
+
+        private boolean initialized = false; // stores whether or not motor has been powered already
+
+        @Override
+        public boolean run(@NonNull TelemetryPacket telemetryPacket) {
+            if (!initialized) {
+                lin1.setTargetPosition((int) (TEST_POSITION * COUNTS_PER_INCH_LIFT));
+                lin2.setTargetPosition((int) (TEST_POSITION * COUNTS_PER_INCH_LIFT));
+
+                lin1.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+                lin2.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+
+                lin1.setPower(LIFT_POWER);
+                lin2.setPower(LIFT_POWER);
+
+                timer.reset();
+
+                initialized = true;
+            }
+
+            // checks lift's current position
+            telemetryPacket.put("liftPos: ", lin1.getCurrentPosition());
+            if ((lin1.isBusy() || lin2.isBusy()) && timer.seconds() < TIMEOUT_TIME) {
+                // true causes the action to rerun
+                return true;
+            } else {
+                // false stops action rerun
+                lin1.setPower(0);
+                lin2.setPower(0);
+
+                return false;
+            }
+        }
+    }
+
+    // function ofr function calls
+    public Action testPosition() {
+        return new TestPosition();
+    }
+
     public class AboveHighBar implements Action {
 
         private boolean initialized = false; // stores whether or not motor has been powered already
@@ -76,7 +145,7 @@ public class Lift {
             }
 
             // checks lift's current position
-            telemetryPacket.put("liftPos", lin1.getCurrentPosition());
+            telemetryPacket.put("liftPos: ", lin1.getCurrentPosition());
             if ((lin1.isBusy() || lin2.isBusy()) && timer.seconds() < TIMEOUT_TIME) {
                 // true causes the action to rerun
                 return true;
@@ -85,14 +154,12 @@ public class Lift {
                 lin1.setPower(0);
                 lin2.setPower(0);
 
-                lin1.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
-                lin2.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
-
                 return false;
             }
         }
     }
 
+    // function for function calls
     public Action aboveHighBar() {
         return new AboveHighBar();
     }
@@ -119,7 +186,7 @@ public class Lift {
             }
 
             // checks lift's current position
-            telemetryPacket.put("liftPos", lin1.getCurrentPosition());
+            telemetryPacket.put("liftPos: ", lin1.getCurrentPosition());
             if ((lin1.isBusy() || lin2.isBusy()) && timer.seconds() < TIMEOUT_TIME) {
                 // true causes the action to rerun
                 return true;
@@ -127,9 +194,6 @@ public class Lift {
                 // false stops action rerun
                 lin1.setPower(0);
                 lin2.setPower(0);
-
-                lin1.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
-                lin2.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
 
                 return false;
             }
@@ -161,7 +225,7 @@ public class Lift {
             }
 
             // checks lift's current position
-            telemetryPacket.put("liftPos", lin1.getCurrentPosition());
+            telemetryPacket.put("liftPos: ", lin1.getCurrentPosition());
             if ((lin1.isBusy() || lin2.isBusy()) && timer.seconds() < TIMEOUT_TIME) {
                 // true causes the action to rerun
                 return true;
@@ -169,9 +233,6 @@ public class Lift {
                 // false stops action rerun
                 lin1.setPower(0);
                 lin2.setPower(0);
-
-                lin1.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
-                lin2.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
 
                 return false;
             }

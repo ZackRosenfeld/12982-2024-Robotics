@@ -1,8 +1,6 @@
-package org.firstinspires.ftc.teamcode.Autonomous2025;
+package org.firstinspires.ftc.teamcode.Autonomous2025.TestAutos;
 
 import com.acmerobotics.dashboard.config.Config;
-import com.acmerobotics.roadrunner.Line;
-import com.acmerobotics.roadrunner.ParallelAction;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.SequentialAction;
 import com.acmerobotics.roadrunner.TrajectoryActionBuilder;
@@ -21,9 +19,9 @@ public class SpecimenPickupTest extends LinearOpMode {
     public static double FORWARD_INITIAL = 6;
     public static double BACKWARD_PICKUP = 5;
     public static boolean SCORE_SPECIMEN = true;
-    public static double FORWARD_AFTER_PICKUP = 28;
+    public static double FORWARD_AFTER_PICKUP = 24;
     public static double WAIT_SECONDS = 2;
-    public static double SCORING_POSITION = 33;
+    public static double SCORING_POSITION = 29;
 
     @Override
     public void runOpMode() throws InterruptedException {

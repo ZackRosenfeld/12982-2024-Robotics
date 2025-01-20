@@ -1,6 +1,5 @@
-package org.firstinspires.ftc.teamcode.Autonomous2025;
+package org.firstinspires.ftc.teamcode.Autonomous2025.TestAutos;
 
-import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.SequentialAction;
 import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;

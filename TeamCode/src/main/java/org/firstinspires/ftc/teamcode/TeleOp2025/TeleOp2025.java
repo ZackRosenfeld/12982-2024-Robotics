@@ -41,7 +41,7 @@ public class TeleOp2025 extends OpMode {
         double a = -gamepad1.left_stick_y; //reverse the y stick
         double l = gamepad1.left_stick_x;
         double rx = gamepad1.right_stick_x;
-        double slideSpeed = .65;
+        double slideSpeed = .7;
         //double speedControl = Math.max(Math.abs(a) + Math.abs(l) + Math.abs(rx), 1);
 
         //slow mode

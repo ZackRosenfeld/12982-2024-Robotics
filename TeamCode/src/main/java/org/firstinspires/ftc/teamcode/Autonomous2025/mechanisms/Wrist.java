@@ -1,6 +1,10 @@
 package org.firstinspires.ftc.teamcode.Autonomous2025.mechanisms;
 
+import androidx.annotation.NonNull;
+
 import com.acmerobotics.dashboard.config.Config;
+import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
+import com.acmerobotics.roadrunner.Action;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
@@ -8,11 +12,51 @@ import com.qualcomm.robotcore.hardware.Servo;
 public class Wrist {
     Servo wrist = null;
 
-    // movement constants
-    public static double WRIST_DOWN = 0;
-    public static double WRIST_UP = 1;
+    public static double TEST_POSITION = 1;
 
     public Wrist(HardwareMap hardwareMap) {
         wrist = hardwareMap.get(Servo.class, "wrist");
     }
+
+    /** Utilites **/
+
+    // returns current position of servo
+    public double getPosition() {
+        return wrist.getPosition();
+    }
+
+    public class SetPosition implements Action {
+
+        public double POSITION = 0;
+
+        public boolean run(@NonNull TelemetryPacket telemetryPacket) {
+            wrist.setPosition(POSITION);
+            return false;
+        }
+
+    }
+
+    public class TestPosition extends SetPosition {
+        public TestPosition() {
+            POSITION = TEST_POSITION;
+        }
+    }
+
+    public Action testPosition() {
+        return new TestPosition();
+    }
+
+    public class WristDown extends SetPosition {
+
+        public WristDown() {
+            POSITION = 1;
+        }
+
+    }
+
+
+    public Action wristDown() {
+        return new WristDown();
+    }
+
 }

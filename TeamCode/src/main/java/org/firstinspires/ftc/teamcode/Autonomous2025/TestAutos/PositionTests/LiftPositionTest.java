@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.Autonomous2025;
+package org.firstinspires.ftc.teamcode.Autonomous2025.TestAutos.PositionTests;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
@@ -7,20 +7,20 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 
-import org.firstinspires.ftc.teamcode.Autonomous2025.mechanisms.Lift;
-
 @Config
 @Autonomous(name = "LiftPositionTest", group = "Test_Autos")
 public class LiftPositionTest extends LinearOpMode {
 
     private DcMotorEx lin1 = null;
     private DcMotorEx lin2 = null;
-    public static double POSITION = 20;
+    public static double POSITION = 20; // position lifts will run to in inches
+                                        // configurable with ftc dashboard
     private final double COUNTS_PER_INCH_LIFT = 2150.8/4/4.72441;
 
     @Override
     public void runOpMode() throws InterruptedException {
 
+        // Hardware setup
         lin1 = hardwareMap.get(DcMotorEx.class, "linearSlide1");
         lin2 = hardwareMap.get(DcMotorEx.class, "linearSlide2");
 
@@ -40,6 +40,7 @@ public class LiftPositionTest extends LinearOpMode {
 
         waitForStart();
 
+        // running to position and logging
         while (opModeIsActive()) {
             lin1.setTargetPosition((int) (POSITION * COUNTS_PER_INCH_LIFT));
             lin2.setTargetPosition((int) (POSITION * COUNTS_PER_INCH_LIFT));

@@ -118,7 +118,7 @@ public class Lift {
         }
     }
 
-    // function ofr function calls
+    // function for function calls
     public Action testPosition() {
         return new TestPosition();
     }

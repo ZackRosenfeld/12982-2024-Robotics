@@ -68,6 +68,8 @@ public class Arm {
             if (!initialized) {
                 armMotor.setTargetPosition((int) (POSITION * COUNTS_PER_DEGREE_ARM));
 
+                armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
                 armMotor.setPower(ARM_POWER);
 
                 timer.reset();

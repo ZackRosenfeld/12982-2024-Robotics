@@ -1,10 +1,12 @@
 package org.firstinspires.ftc.teamcode.TeleOp2025;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 
+@TeleOp(name = "Zack'sFuntasticTeleOp")
 public class ZacksFuntasticTeleOp extends LinearOpMode {
 
     private DcMotor frontLeft;
@@ -13,6 +15,7 @@ public class ZacksFuntasticTeleOp extends LinearOpMode {
     private DcMotor backRight;
     private DcMotor lin1;
     private DcMotor lin2;
+    // Lift Movement constants
     public static double LIFT_POWER = 0.65; // power sent to lift motors
     private static final double COUNTS_PER_REV_LIFT = 2150.8/4;
     private static final double INCHES_PER_REV_LIFT = 4.72441;
@@ -20,6 +23,7 @@ public class ZacksFuntasticTeleOp extends LinearOpMode {
     private static final double LIFT_MAX_POSITION = 30;
     private static final double LIFT_MIN_POSITION = 0;
     private DcMotor armMotor;
+    // Arm Movement Constants
     private static final double COUNTS_PER_REV_ARM = 5281.1;
     private static final double COUNTS_PER_DEGREE_ARM = COUNTS_PER_REV_ARM / 360.0;
     public static double ARM_POWER = 1;
@@ -41,11 +45,18 @@ public class ZacksFuntasticTeleOp extends LinearOpMode {
             displayName = name;
         }
     }
-    private enum ClawMode {
-        OPEN_LOOP,
-        CLOSED_LOOP
-    }
     private DriveMode driveMode = DriveMode.FAST_MODE;
+
+    private enum ClawMode {
+        OPEN_LOOP("Open Loop"),
+        CLOSED_LOOP("Closed Loop");
+
+        private final String displayName;
+
+        ClawMode(String name) {
+            displayName = name;
+        }
+    }
     private ClawMode clawMode = ClawMode.CLOSED_LOOP;
 
 
@@ -91,6 +102,9 @@ public class ZacksFuntasticTeleOp extends LinearOpMode {
             else if (gamepad2.dpad_up) {
                 clawMode = ClawMode.CLOSED_LOOP;
             }
+
+            telemetry.addData("Drive Mode: ", driveMode.displayName);
+            telemetry.addData("Claw Mode: ", clawMode.displayName);
 
             /** Drivetrain **/
 

@@ -26,16 +26,17 @@ public class ZacksFuntasticTeleOp extends LinearOpMode {
     // Arm Movement Constants
     private static final double COUNTS_PER_REV_ARM = 5281.1;
     private static final double COUNTS_PER_DEGREE_ARM = COUNTS_PER_REV_ARM / 360.0;
-    public static double ARM_POWER = 1;
-    private static final double ARM_MAX_POSITION = 230;
+    public static double ARM_POWER = .7;
+    private static final double ARM_MAX_POSITION = 240;
     private static final double ARM_MIN_POSITION = 0;
     private static double armTargetPosition = 0;
     private static final double ARM_SPEED = 5; // maximum change in target position over 1 loop
     private Servo wristServo;
+    private static double wristTargetPosition = 0;
     private Servo clawServo;
     private enum DriveMode {
         SLOW_MODE(.4, "Slow Mode"),
-        FAST_MODE(1, "Fast Mode");
+        FAST_MODE(.75, "Fast Mode");
 
         private final double speedControl;
         private final String displayName;
@@ -84,6 +85,7 @@ public class ZacksFuntasticTeleOp extends LinearOpMode {
         backRight.setDirection(DcMotor.Direction.REVERSE);
         lin1.setDirection(DcMotor.Direction.FORWARD);
         lin2.setDirection(DcMotor.Direction.REVERSE);
+        armMotor.setDirection(DcMotor.Direction.FORWARD);
 
         waitForStart();
 
@@ -141,15 +143,15 @@ public class ZacksFuntasticTeleOp extends LinearOpMode {
                     lin2.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
                     // Lift Movements
-                    if (gamepad2.right_trigger > 0 &&
+                    if (-gamepad2.left_stick_y > 0 &&
                             lin1.getCurrentPosition() < LIFT_MAX_POSITION * COUNTS_PER_INCH_LIFT) {
-                        lin1.setPower(LIFT_POWER * gamepad2.right_trigger);
-                        lin2.setPower(LIFT_POWER * gamepad2.right_trigger);
+                        lin1.setPower(LIFT_POWER * -gamepad2.left_stick_y);
+                        lin2.setPower(LIFT_POWER * -gamepad2.left_stick_y);
                     }
-                    else if (gamepad2.left_trigger < 0 &&
+                    else if (-gamepad2.left_stick_y < 0 &&
                             lin1.getCurrentPosition() > LIFT_MIN_POSITION * COUNTS_PER_INCH_LIFT) {
-                        lin1.setPower(-LIFT_POWER * gamepad2.left_trigger);
-                        lin2.setPower(-LIFT_POWER * gamepad2.left_trigger);
+                        lin1.setPower(LIFT_POWER * -gamepad2.left_stick_y);
+                        lin2.setPower(LIFT_POWER * -gamepad2.left_stick_y);
                     }
                     else {
                         lin1.setPower(0);
@@ -157,35 +159,36 @@ public class ZacksFuntasticTeleOp extends LinearOpMode {
                     }
 
                     // arm stuff
-                    if (-gamepad2.left_stick_y > 0 &&
+                    if (-gamepad2.right_stick_y > 0 &&
                             armMotor.getCurrentPosition() < ARM_MAX_POSITION * COUNTS_PER_DEGREE_ARM) {
-                        armTargetPosition += -gamepad2.left_stick_y * ARM_SPEED;
+                        armMotor.setPower(ARM_POWER * -gamepad2.right_stick_y);
                     }
-                    else if (-gamepad2.left_stick_y < 0 &&
-                    armMotor.getCurrentPosition() > ARM_MIN_POSITION * COUNTS_PER_DEGREE_ARM) {
-                        armTargetPosition += -gamepad2.left_stick_y * ARM_SPEED;
+                    else if (-gamepad2.right_stick_y < 0 &&
+                            armMotor.getCurrentPosition() > ARM_MIN_POSITION * COUNTS_PER_DEGREE_ARM) {
+                        armMotor.setPower(ARM_POWER * -gamepad2.right_stick_y);
                     }
-
-                    armMotor.setTargetPosition((int) armTargetPosition);
-                    armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                    armMotor.setPower(ARM_POWER);
+                    else {
+                        armMotor.setPower(0);
+                    }
 
 
                     // claw stuff
-                    if (gamepad2.a) {
-                        clawServo.setPosition(0.37);
+                    if (gamepad2.right_trigger > 0) {
+                        clawServo.setPosition(0.7);
                     }
-                    else if (gamepad2.b) {
-                        clawServo.setPosition(0.5);
+                    else if (gamepad2.left_trigger > 0) {
+                        clawServo.setPosition(0);
                     }
 
                     // Wrist Stuff
                     if (gamepad2.right_bumper) {
-                        wristServo.setPosition(1); // up
+                        wristTargetPosition += .01;
                     }
                     else if (gamepad2.left_bumper) {
-                        wristServo.setPosition(0); // down
+                        wristTargetPosition -= .01;
                     }
+
+                    wristServo.setPosition(wristTargetPosition);
                     break;
             }
         }

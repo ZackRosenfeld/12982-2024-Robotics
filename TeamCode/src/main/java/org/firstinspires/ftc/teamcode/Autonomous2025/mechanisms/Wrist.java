@@ -15,7 +15,7 @@ public class Wrist {
     public static double TEST_POSITION = 1;
 
     public Wrist(HardwareMap hardwareMap) {
-        wrist = hardwareMap.get(Servo.class, "wrist");
+        wrist = hardwareMap.get(Servo.class, "clawWristServo");
     }
 
     /** Utilites **/

@@ -2,40 +2,57 @@ package org.firstinspires.ftc.teamcode.TeleOp2025;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 
 @TeleOp(name = "TeleOp2025")
 public class TeleOp2025 extends OpMode {
+    //initialization of motors
     private DcMotor frontLeft;
     private DcMotor frontRight;
     private DcMotor backLeft;
     private DcMotor backRight;
     private DcMotor lin1;
     private DcMotor lin2;
-    private DcMotor clawMotor;
+    //private DcMotor clawMotor;
     private Servo clawServo;
-    private final double speed = 0.7;
+    private double speedControl = 2; //
     @Override
     public void init(){
         frontLeft = hardwareMap.get(DcMotor.class, "leftFrontDrive");
         frontRight = hardwareMap.get(DcMotor.class, "rightFrontDrive");
         backLeft = hardwareMap.get(DcMotor.class, "leftBackDrive");
         backRight = hardwareMap.get(DcMotor.class, "rightBackDrive");
-        /* lin1 = hardwareMap.get(DcMotor.class, "linearSlide1");
+        lin1 = hardwareMap.get(DcMotor.class, "linearSlide1");
         lin2 = hardwareMap.get(DcMotor.class, "linearSlide2");
-        clawMotor = hardwareMap.get(DcMotor.class, "clawClawMotor");
-        clawServo = hardwareMap.get(Servo.class, "clawClawServo"); */
+        //clawMotor = hardwareMap.get(DcMotor.class, "clawClawMotor");
+        clawServo = hardwareMap.get(Servo.class, "clawClawServo");
         telemetry.addData("Hardware: ", "Initialized");
+
+        lin1.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        lin2.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
     }
     @Override
     public void loop(){
-        frontRight.setDirection(DcMotor.Direction.REVERSE);
         backRight.setDirection(DcMotor.Direction.REVERSE);
-
+        lin1.setDirection(DcMotor.Direction.REVERSE);
+        lin2.setDirection(DcMotor.Direction.FORWARD);
         double a = -gamepad1.left_stick_y; //reverse the y stick
         double l = gamepad1.left_stick_x;
         double rx = gamepad1.right_stick_x;
-        double speedControl = Math.max(Math.abs(a) + Math.abs(l) + Math.abs(rx), 1);
+        double slideSpeed = .7;
+        //double speedControl = Math.max(Math.abs(a) + Math.abs(l) + Math.abs(rx), 1);
+
+        //slow mode
+        if (gamepad1.dpad_down)
+        {
+            speedControl = 4;
+        }
+        else if (gamepad1.dpad_up)
+        {
+            speedControl = 2;
+        }
 
         //mechanics
         double frontLeftPower = (a + l + rx)/speedControl;
@@ -60,38 +77,47 @@ public class TeleOp2025 extends OpMode {
             backRight.setPower(0);
         }
 
-        /* //linear slide time
+        //linear slide time
         if (gamepad2.left_stick_y > 0)
         {
-            lin1.setPower(speed);
-            lin2.setPower(speed);
+            lin1.setPower(slideSpeed);
+            lin2.setPower(slideSpeed);
         }
         else if (gamepad2.left_stick_y < 0)
         {
-            lin1.setPower(-speed);
-            lin2.setPower(-speed);
+            lin1.setPower(-slideSpeed);
+            lin2.setPower(-slideSpeed);
+        }
+        else {
+            lin1.setPower(0);
+            lin2.setPower(0);
         }
 
         //arm time
-        if(gamepad2.right_stick_y > 0)
+        /*if(gamepad2.right_stick_y > 0)
         {
-            clawMotor.setPower(speed);
+            clawMotor.setPower(1);
         }
-        else if (gamepad2.right_stick_y > 0)
+        else if (gamepad2.right_stick_y < 0)
         {
-            clawMotor.setPower(-speed);
-        }
+            clawMotor.setPower(-1);
+        }*/
         //claw time
         if (gamepad2.left_trigger > 0)
         {
-            clawServo.setPosition(0.4);
+            clawServo.setPosition(0.37);
         }
         else if (gamepad2.right_trigger > 0)
         {
-            clawServo.setPosition(0.7);
+            clawServo.setPosition(0.5);
+        }
+        else if (gamepad2.dpad_up)
+        {
+            clawServo.setPosition(0.3);
         }
         //SET BACK TO ZERO NO MORE MOVEMENT
-        lin1.setPower(0);
-        lin2.setPower(0); */
+        //lin1.setPower(0);
+        //lin2.setPower(0);
+        //clawMotor.setPower(0);
     }
 }

@@ -1,0 +1,8 @@
+Connecting to control hub:
+1) connect to 12982-RC wifi
+2) open folder "platform-tools" in command prompt
+3) ./adb connect 192.168.43.1
+
+Using ftc dashboard:
+1) connect to 12982-RC wifi
+2) navigate to http://192.168.43.1:8080/dash via browser

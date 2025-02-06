@@ -34,17 +34,15 @@ public class PosePositionTest extends LinearOpMode {
         MecanumDrive drive = new MecanumDrive(hardwareMap,
                 new Pose2d(0, 0, Math.PI / 2));
 
-        TrajectoryActionBuilder driveToPosition = drive.actionBuilder(drive.pose)
+        TrajectoryActionBuilder driveToPosition = drive.actionBuilder(new Pose2d(0, 0, Math.PI / 2))
                 .strafeToLinearHeading(new Vector2d(POSITION_X, POSITION_Y), HEADING);
 
         waitForStart();
 
-        while (opModeIsActive()) {
             Actions.runBlocking(new ParallelAction(driveToPosition.build(),
                     lift.testPosition(),
                     arm.testPosition(),
                     wrist.testPosition(),
                     claw.testPosition()));
-        }
     }
 }

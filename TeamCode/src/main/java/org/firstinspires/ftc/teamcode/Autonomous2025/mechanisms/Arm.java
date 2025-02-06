@@ -25,7 +25,6 @@ public class Arm {
 
     public static double TEST_POSITION = 0;
 
-    public static double TIMEOUT_TIME = 6;
     ElapsedTime timer = new ElapsedTime();
 
 
@@ -63,6 +62,7 @@ public class Arm {
 
         private boolean initialized = false; // stores whether or not motor has been powered already
         public double POSITION = 0;
+        public double TIMEOUT_TIME = 6;
 
         public boolean run(@NonNull TelemetryPacket telemetryPacket) {
             if (!initialized) {
@@ -97,6 +97,7 @@ public class Arm {
     public class TestPosition extends RunToPosition {
         public TestPosition() {
             POSITION = TEST_POSITION;
+            TIMEOUT_TIME = 100000;
         }
     }
 
@@ -112,6 +113,16 @@ public class Arm {
 
     public Action startArm() {
         return new StartArm();
+    }
+
+    public class ScoringHighBar extends RunToPosition {
+        public ScoringHighBar() {
+            POSITION = 170;
+        }
+    }
+
+    public Action scoringHighBar() {
+        return new ScoringHighBar();
     }
 
 }

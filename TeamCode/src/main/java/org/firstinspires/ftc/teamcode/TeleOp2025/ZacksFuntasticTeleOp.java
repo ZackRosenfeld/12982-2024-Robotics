@@ -22,10 +22,11 @@ public class ZacksFuntasticTeleOp extends LinearOpMode {
     private static final double COUNTS_PER_REV_LIFT = 2150.8/4;
     private static final double INCHES_PER_REV_LIFT = 4.72441;
     private static final double COUNTS_PER_INCH_LIFT = COUNTS_PER_REV_LIFT / INCHES_PER_REV_LIFT;
-    private static final double LIFT_MAX_POSITION = 30;
+    private static final double LIFT_MAX_POSITION = 30; // TODO: Configure me!
     private static final double LIFT_MIN_POSITION = 0;
     private double liftTargetPosition = 0;
     private static final double LIFT_SPEED = 10; // maximum change in target position per second in inches
+                                                 // TODO: Configure me!
     private DcMotor armMotor;
     // Arm Movement Constants
     private static final double COUNTS_PER_REV_ARM = 5281.1;
@@ -35,7 +36,10 @@ public class ZacksFuntasticTeleOp extends LinearOpMode {
     private static final double ARM_MIN_POSITION = 0;
     private static double armTargetPosition = 0;
     private static final double ARM_SPEED = 180; // maximum change in target position over 1 second in degrees
+                                                 // TODO: Configure me!
     private Servo wristServo;
+    private static double WRIST_SPEED = .5; // Maximum change in wrist servo position per second
+                                            // TODO: Configure me!
     private static double wristTargetPosition = 0;
     private Servo clawServo;
     // Drive mode enum which also stores speedControl and Name to be displayed
@@ -104,7 +108,7 @@ public class ZacksFuntasticTeleOp extends LinearOpMode {
     Pose home = new Pose(0, 0, 0);
     Pose belowHighBar = new Pose(0, 170, 1);
     Pose scoringHighBar = new Pose(0, 170, .3);
-    Pose specimenFromWall = new Pose(0, 30, .65);
+    Pose specimenFromWall = new Pose(0, 30, .65); // TODO: Configure me!
 
     // ElapsedTime to keep speeds consistent regardless of loop time
     ElapsedTime loopTime = new ElapsedTime();
@@ -295,10 +299,10 @@ public class ZacksFuntasticTeleOp extends LinearOpMode {
 
                     // Wrist Stuff
                     if (gamepad2.right_bumper) {
-                        wristTargetPosition += .5 * lastLoopTime;
+                        wristTargetPosition += WRIST_SPEED * lastLoopTime;
                     }
                     else if (gamepad2.left_bumper) {
-                        wristTargetPosition -= .5 * lastLoopTime;
+                        wristTargetPosition -= WRIST_SPEED * lastLoopTime;
                     }
 
                     wristServo.setPosition(wristTargetPosition);

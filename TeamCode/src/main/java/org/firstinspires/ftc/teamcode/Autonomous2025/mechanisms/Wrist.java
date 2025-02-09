@@ -59,4 +59,29 @@ public class Wrist {
         return new WristDown();
     }
 
+    public class WristUp extends SetPosition {
+
+        public WristUp() {
+            POSITION = .3;
+        }
+
+    }
+
+
+    public Action wristUp() {
+        return new WristUp();
+    }
+
+    public class WallPickup extends SetPosition {
+
+        public WallPickup() {
+            POSITION = .65;
+        }
+
+    }
+
+
+    public Action wallPickup() {
+        return new WallPickup();
+    }
 }

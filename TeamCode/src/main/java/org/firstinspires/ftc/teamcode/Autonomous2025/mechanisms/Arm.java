@@ -105,14 +105,14 @@ public class Arm {
         return new TestPosition();
     }
 
-    public class StartArm extends RunToPosition {
-        public StartArm() {
+    public class Home extends RunToPosition {
+        public Home() {
             POSITION = 0;
         }
     }
 
-    public Action startArm() {
-        return new StartArm();
+    public Action home() {
+        return new Home();
     }
 
     public class ScoringHighBar extends RunToPosition {
@@ -123,6 +123,16 @@ public class Arm {
 
     public Action scoringHighBar() {
         return new ScoringHighBar();
+    }
+
+    public class WallPickup extends RunToPosition {
+        public WallPickup() {
+            POSITION = 30;
+        }
+    }
+
+    public Action wallPickup() {
+        return new WallPickup();
     }
 
 }
